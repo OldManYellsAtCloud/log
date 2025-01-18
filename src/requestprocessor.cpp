@@ -46,7 +46,7 @@ void RequestProcessor::processRequests(std::vector<uint8_t> &buffer)
 {
     int requestType;
     int current_idx = 0;
-    while (current_idx < buffer.size() - 1) {
+    while (current_idx < buffer.size()) {
         if (buffer.size() < sizeof(requestType)){
             selfLog("Invalid request, can't extract request type", LOG_LEVEL::ERROR);
             return;
