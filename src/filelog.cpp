@@ -48,4 +48,5 @@ void FileLog::write(const std::string &msg, const LOG_LEVEL logLevel)
                                        getLogLevelString(logLevel), msg);
     file << finalMsg;
     if (!msg.ends_with("\n")) file << std::endl;
+    file.flush();
 }
