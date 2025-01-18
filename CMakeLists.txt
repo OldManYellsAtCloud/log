@@ -20,8 +20,23 @@ target_include_directories(log
     PRIVATE include
 )
 
+set_target_properties(log PROPERTIES VERSION "1.0")
+set(LOG_PUBLIC_HEADERS "include/log.h" "include/enums.h")
+set_target_properties(log PROPERTIES PUBLIC_HEADER "${LOG_PUBLIC_HEADERS}")
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "logConfig.cmake"
+    VERSION 1.0
+    COMPATIBILITY AnyNewerVersion)
+
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/logConfig.cmake"
+        DESTINATION lib/cmake/log)
+
 include(GNUInstallDirs)
 install(TARGETS log
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/log
 )
