@@ -42,19 +42,52 @@ SocketListener::SocketListener(RequestProcessor* requestProcessor) :
     requestProcessor_->selfLog("SocketListener started up", LOG_LEVEL::INFO);
 }
 
+void SocketListener::clientSocketThread(std::stop_token *st, int clientSocketFd)
+{
+    std::vector<uint8_t> fullRequest;
+    std::array<uint8_t, 10240> buffer;
+
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 500000;
+    setsockopt(clientSocketFd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tv, sizeof(tv));
+
+    int recv_bytes = -1;
+    struct pollfd clientFd[1];
+    clientFd[0].fd = clientSocketFd;
+    clientFd[0].events = POLLIN;
+
+    while (!st->stop_requested() && recv_bytes != 0){
+        poll(clientFd, 1, 1000);
+        if (!(clientFd[0].revents & POLLIN)) continue;
+
+        int current_message_size = 0;
+        fullRequest.clear();
+        while ((recv_bytes = recv(clientSocketFd, buffer.data(), buffer.size(), 0)) > 0){
+            requestProcessor_->selfLog(std::format("message part: {}", recv_bytes), LOG_LEVEL::INFO);
+            current_message_size += recv_bytes;
+            // if it's too big, just drop it.
+            if (current_message_size < MAX_RESPONSE_SIZE) {
+                fullRequest.insert(fullRequest.end(), buffer.begin(), buffer.begin() + recv_bytes);
+            }
+        }
+
+        if (current_message_size <= MAX_RESPONSE_SIZE && current_message_size > 0){
+            requestProcessor_->selfLog(std::format("Message size: {}", current_message_size), LOG_LEVEL::DEBUG);
+            requestProcessor_->processRequests(fullRequest);
+        }
+    }
+}
+
 void SocketListener::startListening(std::stop_token st)
 {
     int accept_sock;
-    int recv_bytes;
-    int current_message_size;
-
-    std::vector<uint8_t> fullRequest;
-    std::array<uint8_t, 1024> buffer;
 
     while (!st.stop_requested()){
         poll(pfd, 1, 500);
 
         if (!(pfd[0].revents & POLLIN)) continue;
+        requestProcessor_->selfLog("Socket event", LOG_LEVEL::DEBUG);
 
         accept_sock = accept(socketFd, nullptr, nullptr);
         if (accept_sock < 0) {
@@ -63,25 +96,15 @@ void SocketListener::startListening(std::stop_token st)
             continue;
         }
 
-        current_message_size = 0;
-        fullRequest.clear();
-        while ((recv_bytes = recv(accept_sock, buffer.data(), sizeof(buffer), 0)) > 0){
-            current_message_size += recv_bytes;
-            // if it's too big, just drop it.
-            if (current_message_size > MAX_RESPONSE_SIZE) {
-                close(accept_sock);
-                break;
-            }
-            fullRequest.insert(fullRequest.end(), buffer.begin(), buffer.begin() + recv_bytes);
-        }
-
-        if (current_message_size <= MAX_RESPONSE_SIZE){
-            requestProcessor_->processRequest(fullRequest);
-        }
+        //std::thread t(&SocketListener::clientSocketThread, &st, accept_sock);
+        clientSocketThreads.emplace_back(&SocketListener::clientSocketThread, this, &st, accept_sock);
     }
 
     requestProcessor_->selfLog("SocketListener cleanup start.", LOG_LEVEL::INFO);
+
+    for (auto& s: clientSocketThreads) s.join();
     close(socketFd);
     unlink("/tmp/log_sock");
+
     requestProcessor_->selfLog("SocketListener closing.", LOG_LEVEL::INFO);
 }

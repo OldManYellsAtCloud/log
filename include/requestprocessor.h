@@ -16,15 +16,15 @@ class RequestProcessor
     bool validateLoggerType(int loggerType);
     bool validateLogLevel(int logLevel);
 
-    void processNewLoggerRequest(std::vector<uint8_t>& buffer);
-    void processLoggingRequest(std::vector<uint8_t>& buffer);
+    void processNewLoggerRequest(std::vector<uint8_t>& buffer, int& current_offset);
+    void processLoggingRequest(std::vector<uint8_t>& buffer, int& current_offset);
 
     std::string extractLoggerName(std::vector<uint8_t>& buffer, int& current_offset);
 public:
     RequestProcessor(std::string selfName);
     ~RequestProcessor(){};
 
-    void processRequest(std::vector<uint8_t>& buffer);
+    void processRequests(std::vector<uint8_t>& buffer);
     void selfLog(std::string message, LOG_LEVEL level);
     void addLogger(std::string name, LOGGER_TYPE loggerType);
 };

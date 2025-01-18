@@ -17,11 +17,15 @@ private:
 
     struct pollfd pfd[1];
 
+    std::vector<std::thread> clientSocketThreads;
+    void clientSocketThread(std::stop_token* st, int clientSocketFd);
+
     bool isValidRequest(int requestType);
     bool isValidLoggerType(int loggerType);
     int getRequestType(std::vector<uint8_t>& buffer);
     void processRequest(std::vector<uint8_t>& buffer);
     void processNewLoggerRequest(std::vector<uint8_t>& buffer);
+
 public:
     SocketListener(RequestProcessor* requestProcessor);
     void startListening(std::stop_token st);

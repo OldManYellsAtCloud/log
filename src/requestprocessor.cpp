@@ -42,30 +42,40 @@ void RequestProcessor::selfLog(std::string message, LOG_LEVEL level)
     writeLog(name, message, level);
 }
 
-void RequestProcessor::processRequest(std::vector<uint8_t> &buffer)
+void RequestProcessor::processRequests(std::vector<uint8_t> &buffer)
 {
     int requestType;
-    if (buffer.size() < sizeof(requestType)){
-        selfLog("Invalid request, can't extract request type", LOG_LEVEL::ERROR);
-        return;
-    } else {
-        memcpy(&requestType, buffer.data(), sizeof(requestType));
-    }
+    int current_idx = 0;
+    while (current_idx < buffer.size() - 1) {
+        if (buffer.size() < sizeof(requestType)){
+            selfLog("Invalid request, can't extract request type", LOG_LEVEL::ERROR);
+            return;
+        } else {
+            memcpy(&requestType, buffer.data() + current_idx, sizeof(requestType));
+            current_idx += sizeof(requestType);
+        }
 
-    if (!validateRequestType(requestType)){
-        selfLog(std::format("Unknown request type: {}", requestType), LOG_LEVEL::ERROR);
-        return;
-    }
+        if (!validateRequestType(requestType)){
+            selfLog(std::format("Unknown request type: {}", requestType), LOG_LEVEL::ERROR);
+            return;
+        }
 
-    switch (requestType){
-    case REQUEST_TYPE::NEW_LOGGER:
-        processNewLoggerRequest(buffer);
+        switch (requestType){
+        case REQUEST_TYPE::NEW_LOGGER:
+            processNewLoggerRequest(buffer, current_idx);
+            break;
+        case REQUEST_TYPE::LOG_MESSAGE:
+            processLoggingRequest(buffer, current_idx);
+            break;
+        default:
+            selfLog(std::format("Unknown request type: {}", requestType), LOG_LEVEL::ERROR);
+        }
     }
 }
 
-void RequestProcessor::processNewLoggerRequest(std::vector<uint8_t> &buffer)
+void RequestProcessor::processNewLoggerRequest(std::vector<uint8_t> &buffer, int &current_offset)
 {
-    int current_offset = 4;
+    selfLog("Starting add new logger", LOG_LEVEL::DEBUG);
     int loggerNameLength;
     if (buffer.size() < current_offset + sizeof(loggerNameLength)){
         selfLog("Can't extract new logger name size", LOG_LEVEL::ERROR);
@@ -90,6 +100,7 @@ void RequestProcessor::processNewLoggerRequest(std::vector<uint8_t> &buffer)
         return;
     } else {
         memcpy(&loggerType, buffer.data() + current_offset, sizeof(loggerType));
+        current_offset += sizeof(loggerType);
     }
 
     if (!validateLoggerType(loggerType)){
@@ -97,12 +108,13 @@ void RequestProcessor::processNewLoggerRequest(std::vector<uint8_t> &buffer)
         return;
     }
 
+    //selfLog(std::format("Adding new logger: {}, type: {}", std::string(loggerName),
+    //                    int(loggerType)), LOG_LEVEL::DEBUG);
     addLogger(loggerName, LOGGER_TYPE(loggerType));
 }
 
-void RequestProcessor::processLoggingRequest(std::vector<uint8_t> &buffer)
+void RequestProcessor::processLoggingRequest(std::vector<uint8_t> &buffer, int& current_offset)
 {
-    int current_offset = 4;
     int loggerNameLength;
     if (buffer.size() < current_offset + sizeof(loggerNameLength)){
         selfLog("Can't extract logger name size", LOG_LEVEL::ERROR);
@@ -145,12 +157,17 @@ void RequestProcessor::processLoggingRequest(std::vector<uint8_t> &buffer)
         logLevel = LOG_LEVEL::INFO;
     } else {
         memcpy(&logLevel, buffer.data() + current_offset, sizeof(logLevel));
+        current_offset += sizeof(logLevel);
     }
 
     if (!validateLogLevel(logLevel)){
         selfLog(std::format("Unknown log level: {}, using INFO", logLevel), LOG_LEVEL::ERROR);
         logLevel = LOG_LEVEL::INFO;
     }
+
+    //selfLog(std::format("Adding message name: {}, msg: {}", std::string(loggerName),
+    //                    std::string(msg)), LOG_LEVEL::DEBUG);
+
     writeLog(loggerName, msg, LOG_LEVEL(logLevel));
 }
 
