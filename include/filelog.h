@@ -11,7 +11,8 @@ class FileLog : public Log
 private:
     std::ofstream file;
     bool isValid() const;
-    bool folderExists(std::string folder);
+    static bool entryExists(std::string path);
+    static std::string getAvailableFileName(std::string name, std::string folder);
 protected:
     unsigned int getLogType() const override;
 public:

@@ -8,10 +8,20 @@ bool FileLog::isValid() const
     return file.is_open();
 }
 
-bool FileLog::folderExists(std::string folder)
+bool FileLog::entryExists(std::string path)
 {
-    std::filesystem::directory_entry de {folder};
+    std::filesystem::directory_entry de {path};
     return de.exists();
+}
+
+std::string FileLog::getAvailableFileName(std::string name, std::string folder)
+{
+    std::string path = std::format("{}/{}.log", folder, name);
+    int i = 0;
+    while (entryExists(path)){
+        path = std::format("{}/{}-{}.log", folder, name, i++);
+    }
+    return path;
 }
 
 unsigned int FileLog::getLogType() const
@@ -21,13 +31,14 @@ unsigned int FileLog::getLogType() const
 
 FileLog::FileLog(std::string name, std::string folder) : Log(name)
 {
-    if (!folderExists(folder)){
+    if (!entryExists(folder)){
         std::cerr << folder << " does not exist! Not creating file log for "
                   << name << std::endl;
         return;
     }
 
-    file = std::ofstream(std::format("{}/{}.log", folder, name), std::ios_base::app);
+    std::string filePath = getAvailableFileName(name, folder);
+    file = std::ofstream(filePath, std::ios_base::app);
 
     if (!isValid()){
         std::cerr << folder << "/" << name << ".log is not writable!" << std::endl;
