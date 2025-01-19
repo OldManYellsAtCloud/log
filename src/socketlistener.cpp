@@ -11,6 +11,8 @@ SocketListener::SocketListener(RequestProcessor* requestProcessor) :
 {
     int ret;
 
+    unlink("/tmp/log_sock");
+
     sockaddr_un sockaddr {
         .sun_family = AF_UNIX,
         .sun_path = "/tmp/log_sock"
@@ -96,7 +98,6 @@ void SocketListener::startListening(std::stop_token st)
             continue;
         }
 
-        //std::thread t(&SocketListener::clientSocketThread, &st, accept_sock);
         clientSocketThreads.emplace_back(&SocketListener::clientSocketThread, this, &st, accept_sock);
     }
 
