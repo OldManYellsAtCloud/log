@@ -10,7 +10,7 @@ class Log
 protected:
     std::string name_;
     static std::string getTimeStamp();
-    static std::string getLogLevelString(LOG_LEVEL logLevel);
+    static std::string getLogLevelString(logging::LOG_LEVEL logLevel);
     /*
      * getLogType is a flag that allows differentiating the
      * different derived classes, used for equality checking.
@@ -21,7 +21,7 @@ public:
     Log(std::string name){name_ = name;};
     std::string getName();
     virtual ~Log(){};
-    virtual void write(const std::string& msg, const LOG_LEVEL logLevel) = 0;
+    virtual void write(const std::string& msg, const logging::LOG_LEVEL logLevel) = 0;
 
     virtual bool operator=(Log* other){
         return name_ == other->name_ && getLogType() == other->getLogType();

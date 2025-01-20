@@ -22,26 +22,26 @@ SocketListener::SocketListener(RequestProcessor* requestProcessor) :
 
     if (socketFd < 0) {
         requestProcessor_->selfLog(std::format("Could not open socket: {}",
-                                               strerror(errno)), LOG_LEVEL::ERROR);
+                                               strerror(errno)), logging::LOG_LEVEL::ERROR);
         return;
     }
 
     ret = bind(socketFd, (struct sockaddr*)&sockaddr, sizeof(sockaddr));
     if (ret < 0){
         requestProcessor_->selfLog(std::format("Could not bind socket: {}",
-                                               strerror(errno)), LOG_LEVEL::ERROR);
+                                               strerror(errno)), logging::LOG_LEVEL::ERROR);
         return;
     }
 
     ret = listen(socketFd, 100);
     if (ret < 0){
         requestProcessor_->selfLog(std::format("Could not mark socket for listening: {}",
-                                               strerror(errno)), LOG_LEVEL::ERROR);
+                                               strerror(errno)), logging::LOG_LEVEL::ERROR);
     }
 
     pfd[0].fd = socketFd;
     pfd[0].events = POLLIN;
-    requestProcessor_->selfLog("SocketListener started up", LOG_LEVEL::INFO);
+    requestProcessor_->selfLog("SocketListener started up", logging::LOG_LEVEL::INFO);
 }
 
 void SocketListener::clientSocketThread(std::stop_token *st, int clientSocketFd)
@@ -66,7 +66,7 @@ void SocketListener::clientSocketThread(std::stop_token *st, int clientSocketFd)
         int current_message_size = 0;
         fullRequest.clear();
         while ((recv_bytes = recv(clientSocketFd, buffer.data(), buffer.size(), 0)) > 0){
-            requestProcessor_->selfLog(std::format("message part: {}", recv_bytes), LOG_LEVEL::INFO);
+            requestProcessor_->selfLog(std::format("message part: {}", recv_bytes), logging::LOG_LEVEL::INFO);
             current_message_size += recv_bytes;
             // if it's too big, just drop it.
             if (current_message_size < MAX_RESPONSE_SIZE) {
@@ -75,7 +75,7 @@ void SocketListener::clientSocketThread(std::stop_token *st, int clientSocketFd)
         }
 
         if (current_message_size <= MAX_RESPONSE_SIZE && current_message_size > 0){
-            requestProcessor_->selfLog(std::format("Message size: {}", current_message_size), LOG_LEVEL::DEBUG);
+            requestProcessor_->selfLog(std::format("Message size: {}", current_message_size), logging::LOG_LEVEL::DEBUG);
             requestProcessor_->processRequests(fullRequest);
         }
     }
@@ -91,23 +91,23 @@ void SocketListener::startListening(std::stop_token st)
         poll(pfd, 1, 500);
 
         if (!(pfd[0].revents & POLLIN)) continue;
-        requestProcessor_->selfLog("Socket event", LOG_LEVEL::DEBUG);
+        requestProcessor_->selfLog("Socket event", logging::LOG_LEVEL::DEBUG);
 
         accept_sock = accept(socketFd, nullptr, nullptr);
         if (accept_sock < 0) {
             requestProcessor_->selfLog(std::format("Accept errored out: {}",
-                                                   strerror(errno)), LOG_LEVEL::ERROR);
+                                                   strerror(errno)), logging::LOG_LEVEL::ERROR);
             continue;
         }
 
         clientSocketThreads.emplace_back(&SocketListener::clientSocketThread, this, &st, accept_sock);
     }
 
-    requestProcessor_->selfLog("SocketListener cleanup start.", LOG_LEVEL::INFO);
+    requestProcessor_->selfLog("SocketListener cleanup start.", logging::LOG_LEVEL::INFO);
 
     for (auto& s: clientSocketThreads) s.join();
     close(socketFd);
     unlink("/tmp/log_sock");
 
-    requestProcessor_->selfLog("SocketListener closing.", LOG_LEVEL::INFO);
+    requestProcessor_->selfLog("SocketListener closing.", logging::LOG_LEVEL::INFO);
 }

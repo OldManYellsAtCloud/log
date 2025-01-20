@@ -14,7 +14,7 @@ protected:
     unsigned int getLogType() const override;
 public:
     ConsoleLog(std::string name);
-    void write(const std::string& msg, const LOG_LEVEL logLevel = INFO) override;
+    void write(const std::string& msg, const logging::LOG_LEVEL logLevel = logging::LOG_LEVEL::INFO) override;
 };
 
 #endif // CONSOLELOG_H

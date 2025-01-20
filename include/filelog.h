@@ -18,7 +18,7 @@ protected:
 public:
     FileLog(std::string name, std::string folder = "/tmp/logs");
     ~FileLog();
-    void write(const std::string &msg, const LOG_LEVEL logLevel) override;
+    void write(const std::string &msg, const logging::LOG_LEVEL logLevel) override;
 };
 
 #endif // FILELOG_H

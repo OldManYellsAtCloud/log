@@ -51,7 +51,7 @@ FileLog::~FileLog()
         file.close();
 }
 
-void FileLog::write(const std::string &msg, const LOG_LEVEL logLevel)
+void FileLog::write(const std::string &msg, const logging::LOG_LEVEL logLevel)
 {
     if (!isValid()) return;
 

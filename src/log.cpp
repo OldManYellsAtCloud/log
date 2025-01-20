@@ -13,14 +13,14 @@ std::string Log::getTimeStamp(){
     return timestamp;
 }
 
-std::string Log::getLogLevelString(LOG_LEVEL logLevel)
+std::string Log::getLogLevelString(logging::LOG_LEVEL logLevel)
 {
     switch(logLevel){
-    case ERROR: return "ERROR";
-    case INFO: return "INFO";
-    case DEBUG: return "DEBUG";
-    case FATAL: return "FATAL";
-    case WARNING: return "WARNING";
+    case logging::LOG_LEVEL::ERROR: return "ERROR";
+    case logging::LOG_LEVEL::INFO: return "INFO";
+    case logging::LOG_LEVEL::DEBUG: return "DEBUG";
+    case logging::LOG_LEVEL::FATAL: return "FATAL";
+    case logging::LOG_LEVEL::WARNING: return "WARNING";
     default: return "N/A";
     }
 

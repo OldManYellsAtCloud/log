@@ -6,7 +6,7 @@
 class LoggerFactory
 {
 public:
-    static Log* createLogger(std::string name, LOGGER_TYPE loggerType);
+    static Log* createLogger(std::string name, logging::LOGGER_TYPE loggerType);
 };
 
 #endif // LOGGERFACTORY_H

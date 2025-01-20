@@ -26,7 +26,7 @@ int main()
 
     RequestProcessor rp{"main_logger"};
     // add a logger for ourselves too
-    rp.addLogger("main_logger", LOGGER_FILE);
+    rp.addLogger("main_logger", logging::LOGGER_FILE);
 
     SocketListener sl {&rp};
 

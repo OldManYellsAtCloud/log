@@ -10,7 +10,7 @@ class RequestProcessor
     std::string name;
     std::vector<Log*> loggers;
 
-    void writeLog(std::string loggerName, std::string message, LOG_LEVEL level);
+    void writeLog(std::string loggerName, std::string message, logging::LOG_LEVEL level);
 
     bool validateRequestType(int requestType);
     bool validateLoggerType(int loggerType);
@@ -25,8 +25,8 @@ public:
     ~RequestProcessor(){};
 
     void processRequests(std::vector<uint8_t>& buffer);
-    void selfLog(std::string message, LOG_LEVEL level);
-    void addLogger(std::string name, LOGGER_TYPE loggerType);
+    void selfLog(std::string message, logging::LOG_LEVEL level);
+    void addLogger(std::string name, logging::LOGGER_TYPE loggerType);
 };
 
 #endif // REQUESTPROCESSOR_H
