@@ -32,9 +32,11 @@ unsigned int FileLog::getLogType() const
 FileLog::FileLog(std::string name, std::string folder) : Log(name)
 {
     if (!entryExists(folder)){
-        std::cerr << folder << " does not exist! Not creating file log for "
-                  << name << std::endl;
-        return;
+        if (!std::filesystem::create_directory(folder)){
+            std::cerr << "Could not create log folder! Not storing log file for "
+                      << name << std::endl;
+            return;
+        }
     }
 
     std::string filePath = getAvailableFileName(name, folder);

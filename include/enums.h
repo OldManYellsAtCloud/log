@@ -1,6 +1,10 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
+#ifdef DEBUG
+#  error DEBUG is defined as a macro somewhere, change its name!
+#endif
+
 namespace logging {
 enum REQUEST_TYPE {
     NEW_LOGGER = 0,
