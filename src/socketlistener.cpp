@@ -79,6 +79,8 @@ void SocketListener::clientSocketThread(std::stop_token *st, int clientSocketFd)
             requestProcessor_->processRequests(fullRequest);
         }
     }
+
+    close(clientSocketFd);
 }
 
 void SocketListener::startListening(std::stop_token st)
