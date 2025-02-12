@@ -28,5 +28,5 @@ void ConsoleLog::write(const std::string& msg, const logging::LOG_LEVEL logLevel
 
 unsigned int ConsoleLog::getLogType() const
 {
-    return CONSOLE_LOG_TYPE;
+    return logging::LOGGER_TYPE::LOGGER_CONSOLE;
 }

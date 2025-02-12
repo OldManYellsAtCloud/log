@@ -7,6 +7,10 @@ RequestProcessor::RequestProcessor(std::string selfName) : name {selfName} {}
 
 void RequestProcessor::addLogger(std::string name, logging::LOGGER_TYPE loggerType)
 {
+    for (Log* l: loggers){
+        if (l->getName() == name && l->getLogType() == loggerType)
+            return;
+    }
     loggers.push_back(LoggerFactory::createLogger(name, loggerType));
 }
 

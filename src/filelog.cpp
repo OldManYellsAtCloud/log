@@ -26,7 +26,7 @@ std::string FileLog::getAvailableFileName(std::string name, std::string folder)
 
 unsigned int FileLog::getLogType() const
 {
-    return FILE_LOG_TYPE;
+    return logging::LOGGER_TYPE::LOGGER_FILE;
 }
 
 FileLog::FileLog(std::string name, std::string folder) : Log(name)
