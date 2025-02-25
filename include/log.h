@@ -11,6 +11,7 @@ protected:
     std::string name_;
     static std::string getTimeStamp();
     static std::string getLogLevelString(logging::LOG_LEVEL logLevel);
+    logging::LOG_LEVEL defaultLogLevel;
 public:
     /*
      * getLogType is a flag that allows differentiating the
@@ -20,7 +21,8 @@ public:
      * always return file_logger type)
      */
     virtual unsigned int getLogType() const = 0;
-    Log(std::string name){name_ = name;};
+    Log(std::string name){name_ = name; defaultLogLevel = logging::LOG_LEVEL::DEBUG;}
+    void setLogLevel(logging::LOG_LEVEL newLevel){defaultLogLevel = newLevel;}
     std::string getName();
     virtual ~Log(){};
     virtual void write(const std::string& msg, const logging::LOG_LEVEL logLevel) = 0;

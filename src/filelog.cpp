@@ -56,6 +56,7 @@ FileLog::~FileLog()
 void FileLog::write(const std::string &msg, const logging::LOG_LEVEL logLevel)
 {
     if (!isValid()) return;
+    if (logLevel < defaultLogLevel) return;
 
     std::string finalMsg = std::format("{} - {}: {}", getTimeStamp(),
                                        getLogLevelString(logLevel), msg);
