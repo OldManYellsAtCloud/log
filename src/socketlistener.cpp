@@ -77,6 +77,8 @@ void SocketListener::clientSocketThread(std::stop_token *st, int clientSocketFd)
         if (current_message_size <= MAX_RESPONSE_SIZE && current_message_size > 0){
             requestProcessor_->selfLog(std::format("Message size: {}", current_message_size), logging::LOG_LEVEL::DEBUG);
             requestProcessor_->processRequests(fullRequest);
+        } else {
+            requestProcessor_->selfLog(std::format("Too big message dropped, size: {}", current_message_size), logging::LOG_LEVEL::WARNING);
         }
     }
 
