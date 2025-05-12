@@ -89,12 +89,13 @@ void RequestProcessor::processNewLoggerRequest(std::vector<uint8_t> &buffer, int
         current_offset += sizeof(loggerNameLength);
     }
 
-    char loggerName[loggerNameLength];
+    char loggerName[loggerNameLength + 1];
     if (buffer.size() < current_offset + loggerNameLength){
         selfLog("Can't extract new logger name", logging::LOG_LEVEL::ERROR);
         return;
     } else {
         memcpy(loggerName, buffer.data() + current_offset, loggerNameLength);
+        loggerName[loggerNameLength] = '\0';
         current_offset += loggerNameLength;
     }
 
@@ -128,13 +129,14 @@ void RequestProcessor::processLoggingRequest(std::vector<uint8_t> &buffer, int& 
         current_offset += sizeof(loggerNameLength);
     }
 
-    char loggerName[loggerNameLength];
+    char loggerName[loggerNameLength + 1];
     if (buffer.size() < current_offset + loggerNameLength){
         selfLog("Can't extract logger name", logging::LOG_LEVEL::ERROR);
         return;
     } else {
         memcpy(loggerName, buffer.data() + current_offset, loggerNameLength);
         current_offset += loggerNameLength;
+        loggerName[loggerNameLength] = '\0';
     }
 
     int msgLength;
@@ -146,12 +148,13 @@ void RequestProcessor::processLoggingRequest(std::vector<uint8_t> &buffer, int& 
         current_offset += sizeof(msgLength);
     }
 
-    char msg[msgLength];
+    char msg[msgLength + 1];
     if (buffer.size() < current_offset + msgLength){
         selfLog("Can't extract log message", logging::LOG_LEVEL::ERROR);
         return;
     } else {
         memcpy(msg, buffer.data() + current_offset, msgLength);
+        msg[msgLength] = '\0';
         current_offset += msgLength;
     }
 
